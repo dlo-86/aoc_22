@@ -4,7 +4,7 @@ use std::{
 };
 
 fn main() {
-    let content = fs::read_to_string("./test_input.txt").expect("Could not read file");
+    let content = fs::read_to_string("./input.txt").expect("Could not read file");
     part1(&content);
     part2(&content);
 }
@@ -39,10 +39,6 @@ fn check_if_near_symbol(map: &Vec<Vec<char>>, x: usize, y: usize) -> bool {
     return false;
 }
 
-fn is_gear(map: &Vec<Vec<char>>, x: usize, y: usize) -> bool {
-    return map[x][y] == '*';
-}
-
 fn get_gears(map: &Vec<Vec<char>>, x: usize, y: usize) -> HashSet<(usize, usize)> {
     let mut gears = HashSet::new();
     let mut x_lower_bound: usize = 0;
@@ -57,7 +53,10 @@ fn get_gears(map: &Vec<Vec<char>>, x: usize, y: usize) -> HashSet<(usize, usize)
         for y_ref in y_lower_bound..y + 2 {
             // println!("{}, {}", x_ref, y_ref);
             if x_ref < map.len() && y_ref < map[0].len() {
-                gears.insert((x, y));
+                // println!("{}, {}, {}", map[x][y], x, y);
+                if map[x_ref][y_ref] == '*' {
+                    gears.insert((x_ref, y_ref));
+                }
             }
         }
     }
@@ -99,7 +98,6 @@ fn part2(content: &String) {
         map.push(chars);
     }
     let mut number_string = String::from("");
-    let mut near_symbol = false;
     let mut gear_dict: HashMap<(usize, usize), Vec<u32>> = HashMap::new();
     let mut found_gears: HashSet<(usize, usize)> = HashSet::new();
     for x in 0..map.len() {
@@ -109,15 +107,13 @@ fn part2(content: &String) {
                 found_gears.extend(get_gears(&map, x, y).iter());
             } else if number_string != "" {
                 assign_number_to_gear(&mut found_gears, &mut gear_dict, &mut number_string);
-                // count_number(&mut near_symbol, &mut number_string, &mut sum);
             }
         }
-        if number_string != "" && near_symbol {
+        if number_string != "" {
             assign_number_to_gear(&mut found_gears, &mut gear_dict, &mut number_string);
-            // count_number(&mut near_symbol, &mut number_string, &mut sum);
         }
     }
-    for (gear, numbers) in gear_dict.iter() {
+    for numbers in gear_dict.values() {
         if numbers.len() == 2 {
             sum += numbers[0] * numbers[1];
         }
@@ -138,8 +134,8 @@ fn assign_number_to_gear(
         }
         gear_dict.get_mut(gear).unwrap().push(number);
     }
-    println!("{}", number);
-    println!("{:?}", gear_dict);
+    // println!("{}", number);
+    // println!("{:?}", gear_dict);
     found_gears.clear();
 }
 
@@ -149,7 +145,7 @@ fn count_number(near_symbol: &mut bool, number_string: &mut String, sum: &mut u3
         *number_string = String::from("")
     } else {
         let number = number_string.parse::<u32>().expect("Expected a number");
-        println!("{}", number);
+        // println!("{}", number);
         *sum += number;
         // println!("Sum: {}", sum);
         *number_string = String::from("");
